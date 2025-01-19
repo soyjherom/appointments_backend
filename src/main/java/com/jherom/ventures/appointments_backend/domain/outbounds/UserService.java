@@ -1,7 +1,6 @@
 package com.jherom.ventures.appointments_backend.domain.outbounds;
 
 import com.jherom.ventures.appointments_backend.exceptions.CommonException;
-import com.jherom.ventures.appointments_backend.exceptions.UserNotFoundException;
 import com.jherom.ventures.appointments_backend.rest.resources.inbound.UserRequest;
 import com.jherom.ventures.appointments_backend.rest.resources.outbound.UserResponse;
 import org.springframework.data.domain.Page;
