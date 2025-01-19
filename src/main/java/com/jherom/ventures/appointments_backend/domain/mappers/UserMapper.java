@@ -7,8 +7,11 @@ import com.jherom.ventures.appointments_backend.utils.CryptoUtil;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel="spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
+@Mapper(componentModel="spring",
+        injectionStrategy = InjectionStrategy.CONSTRUCTOR,
+        unmappedSourcePolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
     UserResponse userToUserResponse(User user);
 

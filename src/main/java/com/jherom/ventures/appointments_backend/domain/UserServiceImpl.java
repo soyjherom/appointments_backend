@@ -8,6 +8,7 @@ import com.jherom.ventures.appointments_backend.models.User;
 import com.jherom.ventures.appointments_backend.repositories.UserRepository;
 import com.jherom.ventures.appointments_backend.rest.resources.inbound.UserRequest;
 import com.jherom.ventures.appointments_backend.rest.resources.outbound.UserResponse;
+import com.jherom.ventures.appointments_backend.utils.CryptoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -31,17 +32,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse updateUser(String userId, UserRequest userRequest) throws CommonException {
         User currentUser = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-        User updatingUser = userMapper.userRequestToUser(userId, userRequest);
-        if (thereAreChanges(currentUser, updatingUser)) {
+        if (!isDataEqual(currentUser, userRequest)) {
+            User updatingUser = userMapper.userRequestToUser(userId, userRequest);
             User updatedUser = userRepository.save(updatingUser);
             return userMapper.userToUserResponse(updatedUser);
         }
         return userMapper.userToUserResponse(currentUser);
     }
 
-    private boolean thereAreChanges(User currentUser, User updatingUser) {
-        if (currentUser.getName().equals(updatingUser.getName()) &&
-        currentUser.getEmail().equals(updatingUser.getEmail()))
+    private boolean isDataEqual(User currentUser, UserRequest userRequest) {
+        final String phoneHash = CryptoUtil.getHash(userRequest.getPhone());
+        final String emailHash = CryptoUtil.getHash(userRequest.getEmail());
+        return currentUser.getEmailHash().equals(emailHash) && currentUser.getPhoneHash().equals(phoneHash);
     }
 
     @Override
