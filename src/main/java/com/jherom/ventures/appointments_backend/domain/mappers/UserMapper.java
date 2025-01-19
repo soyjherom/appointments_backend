@@ -13,6 +13,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
+import org.springframework.data.domain.Page;
 
 import java.util.UUID;
 
@@ -54,6 +55,10 @@ public interface UserMapper {
     @Named("getHashedEmail")
     default String getHashedEmail(String email) throws HashingException {
         return CryptoUtil.getHash(email);
+    }
+
+    default Page<UserResponse> pageToUserResponsePage(Page<User> userPage) {
+        return userPage.map(this::userToUserResponse);
     }
 
     @Mapping(target = "id", expression = "java(user.getId())")

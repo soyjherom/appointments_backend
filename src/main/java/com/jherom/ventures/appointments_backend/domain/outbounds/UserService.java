@@ -9,8 +9,8 @@ import org.springframework.data.domain.Page;
 public interface UserService {
     String createUser(UserRequest userRequest) throws CommonException;
     UserResponse updateUser(String userId, UserRequest userRequest) throws CommonException;
-    UserResponse getUserById(String userId);
+    UserResponse getUserById(String userId) throws CommonException;
     Page<UserResponse> getUsersByName(String name, int page, int size, String sortBy, String sortDirection);
     Page<UserResponse> getAllUsers(int page, int size, String sortBy, String sortDirection);
-    void deleteUserById(String userId);
+    void deleteUserById(String userId) throws CommonException;
 }

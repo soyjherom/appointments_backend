@@ -13,6 +13,9 @@ import com.jherom.ventures.appointments_backend.utils.CryptoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -33,7 +36,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse updateUser(String userId, UserRequest userRequest) throws CommonException {
         User currentUser = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-        if (!isDataEqual(currentUser, userRequest)) {
+        if (!equals(currentUser, userRequest)) {
             User updatingUser = userMapper.userRequestToUser(userId, userRequest);
             User updatedUser = userRepository.save(updatingUser);
             return userMapper.userToUserResponse(updatedUser);
@@ -41,29 +44,41 @@ public class UserServiceImpl implements UserService {
         return userMapper.userToUserResponse(currentUser);
     }
 
-    private boolean isDataEqual(User currentUser, UserRequest userRequest) throws HashingException {
+    private boolean equals(User currentUser, UserRequest userRequest) throws HashingException {
         final String phoneHash = CryptoUtil.getHash(userRequest.getPhone());
         final String emailHash = CryptoUtil.getHash(userRequest.getEmail());
         return currentUser.getEmailHash().equals(emailHash) && currentUser.getPhoneHash().equals(phoneHash);
     }
 
     @Override
-    public UserResponse getUserById(String userId) {
-        return null;
+    public UserResponse getUserById(String userId) throws CommonException {
+        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        return userMapper.userToUserResponse(user);
     }
 
     @Override
     public Page<UserResponse> getUsersByName(String name, int page, int size, String sortBy, String sortDirection) {
-        return null;
+        return userMapper.pageToUserResponsePage(
+                userRepository.findByNameContaining(name,
+                        getPageable(page, size, sortBy, sortDirection))
+        );
+    }
+
+    private Pageable getPageable(int page, int size, String sortBy, String sortDirection) {
+        Sort sort = Sort.by(Sort.Order.by(sortBy).with(Sort.Direction.fromString(sortDirection)));
+        return PageRequest.of(page, size, sort);
     }
 
     @Override
     public Page<UserResponse> getAllUsers(int page, int size, String sortBy, String sortDirection) {
-        return null;
+        return userMapper.pageToUserResponsePage(
+                userRepository.findAll(getPageable(page, size, sortBy, sortDirection))
+        );
     }
 
     @Override
-    public void deleteUserById(String userId) {
-
+    public void deleteUserById(String userId) throws CommonException{
+        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        userRepository.delete(user);
     }
 }
