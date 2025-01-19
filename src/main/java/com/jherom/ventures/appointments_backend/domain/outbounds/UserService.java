@@ -7,7 +7,7 @@ import com.jherom.ventures.appointments_backend.rest.resources.outbound.UserResp
 import org.springframework.data.domain.Page;
 
 public interface UserService {
-    String createUser(UserRequest userRequest);
+    String createUser(UserRequest userRequest) throws CommonException;
     UserResponse updateUser(String userId, UserRequest userRequest) throws CommonException;
     UserResponse getUserById(String userId);
     Page<UserResponse> getUsersByName(String name, int page, int size, String sortBy, String sortDirection);

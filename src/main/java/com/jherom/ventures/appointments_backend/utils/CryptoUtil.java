@@ -2,6 +2,7 @@ package com.jherom.ventures.appointments_backend.utils;
 
 import com.jherom.ventures.appointments_backend.exceptions.DecryptionException;
 import com.jherom.ventures.appointments_backend.exceptions.EncryptionException;
+import com.jherom.ventures.appointments_backend.exceptions.HashingException;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.Cipher;
@@ -13,7 +14,8 @@ import java.util.Base64;
 @Slf4j
 public class CryptoUtil {
     private static final String ENCRYPTION_KEY = "my_temporary_encryption_key";
-    public static String getHash(String value) {
+
+    public static String getHash(String value) throws HashingException {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hashBytes = digest.digest(value.getBytes());
@@ -25,9 +27,10 @@ public class CryptoUtil {
         } catch (NoSuchAlgorithmException nsaException) {
             final String message = "SHA Algorithm not found";
             log.error(message);
-            throw new RuntimeException(message, nsaException);
+            throw new HashingException();
         }
     }
+
     public static String encrypt(String value) throws EncryptionException {
         try {
             SecretKeySpec key = new SecretKeySpec(ENCRYPTION_KEY.getBytes(), "AES");
@@ -41,6 +44,7 @@ public class CryptoUtil {
             throw new EncryptionException();
         }
     }
+
     public static String decrypt(String encryptedValue) throws DecryptionException {
         try {
             SecretKeySpec key = new SecretKeySpec(ENCRYPTION_KEY.getBytes(), "AES");

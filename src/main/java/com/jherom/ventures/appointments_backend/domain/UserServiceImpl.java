@@ -3,6 +3,7 @@ package com.jherom.ventures.appointments_backend.domain;
 import com.jherom.ventures.appointments_backend.domain.mappers.UserMapper;
 import com.jherom.ventures.appointments_backend.domain.outbounds.UserService;
 import com.jherom.ventures.appointments_backend.exceptions.CommonException;
+import com.jherom.ventures.appointments_backend.exceptions.HashingException;
 import com.jherom.ventures.appointments_backend.exceptions.UserNotFoundException;
 import com.jherom.ventures.appointments_backend.models.User;
 import com.jherom.ventures.appointments_backend.repositories.UserRepository;
@@ -23,7 +24,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Override
-    public String createUser(UserRequest userRequest) {
+    public String createUser(UserRequest userRequest) throws CommonException {
         User user = userMapper.userRequestToUser(userRequest);
         User savedUser = userRepository.save(user);
         return savedUser.getId();
@@ -40,7 +41,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.userToUserResponse(currentUser);
     }
 
-    private boolean isDataEqual(User currentUser, UserRequest userRequest) {
+    private boolean isDataEqual(User currentUser, UserRequest userRequest) throws HashingException {
         final String phoneHash = CryptoUtil.getHash(userRequest.getPhone());
         final String emailHash = CryptoUtil.getHash(userRequest.getEmail());
         return currentUser.getEmailHash().equals(emailHash) && currentUser.getPhoneHash().equals(phoneHash);
