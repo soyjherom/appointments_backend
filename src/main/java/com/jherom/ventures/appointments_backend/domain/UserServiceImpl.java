@@ -17,6 +17,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -27,8 +30,16 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Override
+    @Transactional
     public String createUser(UserRequest userRequest) throws CommonException {
-        User user = userMapper.userRequestToUser(userRequest);
+        User user = User.builder()
+                .id(UUID.randomUUID().toString())
+                .name(userRequest.getName())
+                .phone(CryptoUtil.encrypt(userRequest.getPhone()))
+                .phoneHash(CryptoUtil.getHash(userRequest.getPhone()))
+                .email(CryptoUtil.encrypt(userRequest.getEmail()))
+                .emailHash(CryptoUtil.getHash(userRequest.getEmail()))
+                .build();
         User savedUser = userRepository.save(user);
         return savedUser.getId();
     }
@@ -37,17 +48,25 @@ public class UserServiceImpl implements UserService {
     public UserResponse updateUser(String userId, UserRequest userRequest) throws CommonException {
         User currentUser = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
         if (!equals(currentUser, userRequest)) {
-            User updatingUser = userMapper.userRequestToUser(userId, userRequest);
-            User updatedUser = userRepository.save(updatingUser);
+            currentUser.setName(userRequest.getName());
+            currentUser.setPhone(CryptoUtil.encrypt(userRequest.getPhone()));
+            currentUser.setPhoneHash(CryptoUtil.getHash(userRequest.getPhone()));
+            currentUser.setEmail(CryptoUtil.encrypt(userRequest.getEmail()));
+            currentUser.setEmailHash(CryptoUtil.encrypt(userRequest.getEmail()));
+            currentUser.setVersion(currentUser.getVersion() + 1);
+            User updatedUser = userRepository.save(currentUser);
             return userMapper.userToUserResponse(updatedUser);
         }
         return userMapper.userToUserResponse(currentUser);
     }
 
     private boolean equals(User currentUser, UserRequest userRequest) throws HashingException {
+        final String name = userRequest.getName();
         final String phoneHash = CryptoUtil.getHash(userRequest.getPhone());
         final String emailHash = CryptoUtil.getHash(userRequest.getEmail());
-        return currentUser.getEmailHash().equals(emailHash) && currentUser.getPhoneHash().equals(phoneHash);
+        return currentUser.getName().equals(name)
+                && currentUser.getEmailHash().equals(emailHash)
+                && currentUser.getPhoneHash().equals(phoneHash);
     }
 
     @Override

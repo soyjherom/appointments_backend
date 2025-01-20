@@ -5,14 +5,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.Version;
+import lombok.Data;
 import lombok.experimental.SuperBuilder;
 
 @Entity
-@Getter
-@Setter
 @SuperBuilder
+@Data
 public class User {
 
     @Id
@@ -33,5 +32,9 @@ public class User {
 
     @Column(length = 64)
     private String emailHash;
+
+    @Version
+    @Column
+    private int version;
 
 }

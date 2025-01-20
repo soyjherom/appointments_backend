@@ -13,7 +13,7 @@ import java.util.Base64;
 
 @Slf4j
 public class CryptoUtil {
-    private static final String ENCRYPTION_KEY = "my_temporary_encryption_key";
+    private static final String ENCRYPTION_KEY = "my_temp_encrypti";
 
     public static String getHash(String value) throws HashingException {
         try {
@@ -39,8 +39,8 @@ public class CryptoUtil {
             byte[] encrypted = cipher.doFinal(value.getBytes());
             return Base64.getEncoder().encodeToString(encrypted);
         } catch (Exception e) {
-            final String message = "Error encrypting the value";
-            log.error(message);
+            final String message = "Error encrypting the value: {}";
+            log.error(message, e.getMessage());
             throw new EncryptionException();
         }
     }
